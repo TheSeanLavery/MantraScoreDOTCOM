@@ -1,0 +1,6 @@
+# MantraScore.com robots.txt
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://mantrascore.com/sitemap.xml 

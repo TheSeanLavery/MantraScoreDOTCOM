@@ -3,11 +3,16 @@ import MicrophonePermissionGuide from "./MicrophonePermissionGuide";
 import TranscriptionArea from "./TranscriptionArea";
 import ControlsArea from "./ControlsArea";
 import AffirmationCounter from "./AffirmationCounter";
+import { DateSelector } from "./DateSelector";
+import { ImportExportData } from "./ImportExportData";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
-import { Toaster } from "@/components/ui/toaster";
+import { getTodayDateString } from "@/lib/db";
+import { Link } from "@/components/ui/link";
+import { Info } from "lucide-react";
 
 export default function LiveTranscribe() {
   const [showPermissionGuide, setShowPermissionGuide] = useState(true);
+  const [selectedDate, setSelectedDate] = useState(getTodayDateString());
   
   const {
     transcript,
@@ -37,12 +42,33 @@ export default function LiveTranscribe() {
     resetTranscript();
   };
 
+  // Handle date change
+  const handleDateChange = (date: string) => {
+    setSelectedDate(date);
+  };
+
+  // Determine if we're in read-only mode (viewing a past date)
+  const isReadOnly = selectedDate !== getTodayDateString();
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
       <header className="mb-6 text-center">
-        <h1 className="text-2xl md:text-3xl font-semibold text-slate-800 mb-2">Affirmation Counter</h1>
-        <p className="text-slate-500">Count your positive affirmations and track words to avoid</p>
+        <h1 className="text-2xl md:text-3xl font-semibold text-slate-800 mb-2">
+          <span className="text-blue-600">Mantra</span><span className="text-green-600">Score</span>.com
+        </h1>
+        <p className="text-slate-500 mb-2">Track your daily affirmations and mindful speech patterns</p>
+        <div className="flex justify-center">
+          <Link href="/about" className="text-sm text-slate-400 flex items-center hover:text-blue-600">
+            <Info className="h-3 w-3 mr-1" />
+            About
+          </Link>
+        </div>
       </header>
+
+      {/* Date selector only */}
+      <div className="mb-6">
+        <DateSelector onDateChange={handleDateChange} />
+      </div>
 
       {showPermissionGuide && <MicrophonePermissionGuide />}
       
@@ -58,28 +84,53 @@ export default function LiveTranscribe() {
         </div>
       )}
 
-      <AffirmationCounter transcript={transcript} />
-
-      <TranscriptionArea 
+      <AffirmationCounter 
         transcript={transcript} 
-        interimText={interimText}
-        isRecording={isRecording}
-        isListening={isListening}
-        hasError={hasError} 
+        selectedDate={selectedDate}
+        readOnly={isReadOnly}
       />
 
-      <ControlsArea 
-        isRecording={isRecording} 
-        toggleRecording={toggleRecording} 
-        clearTranscript={clearTranscript} 
-      />
+      {!isReadOnly && (
+        <>
+          <TranscriptionArea 
+            transcript={transcript} 
+            interimText={interimText}
+            isRecording={isRecording}
+            isListening={isListening}
+            hasError={hasError} 
+          />
 
-      <footer className="text-center text-sm text-slate-500 mt-8">
-        <p>Privacy Note: All transcription happens locally in your browser. No audio data is sent to any server.</p>
+          <ControlsArea 
+            isRecording={isRecording} 
+            toggleRecording={toggleRecording} 
+            clearTranscript={clearTranscript} 
+          />
+        </>
+      )}
+
+      <footer className="text-center text-sm text-slate-500 mt-8 border-t pt-8">
+        <p>© {new Date().getFullYear()} MantraScore.com | Created by Sean Lavery</p>
+        <p className="mt-2">All data is stored locally in your browser. No audio or transcript data is sent to any server.</p>
+        <div className="flex justify-center gap-4 mt-3">
+          <Link 
+            href="https://github.com/TheSeanLavery/mantrascore.com" 
+            className="text-xs text-slate-400 hover:text-blue-600"
+          >
+            GitHub
+          </Link>
+          <Link 
+            href="/license.txt" 
+            className="text-xs text-slate-400 hover:text-blue-600"
+          >
+            MIT License
+          </Link>
+        </div>
       </footer>
       
-      {/* Show toast notifications for completed targets */}
-      <Toaster />
+      {/* Import/Export controls at the bottom */}
+      <div className="mt-8 flex justify-center">
+        <ImportExportData />
+      </div>
     </div>
   );
 }
