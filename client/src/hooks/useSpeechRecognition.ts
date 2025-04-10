@@ -8,6 +8,7 @@ interface SpeechRecognitionOptions {
 interface SpeechRecognitionHook {
   transcript: string;
   isRecording: boolean;
+  isListening: boolean;
   hasError: boolean;
   errorMessage: string | null;
   startRecording: () => void;
@@ -22,6 +23,7 @@ export function useSpeechRecognition(options: SpeechRecognitionOptions = {}): Sp
   const [hasError, setHasError] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [supported, setSupported] = useState(true);
+  const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<any>(null);
 
   const { onPermissionDenied, lang = 'en-US' } = options;
@@ -63,7 +65,17 @@ export function useSpeechRecognition(options: SpeechRecognitionOptions = {}): Sp
         }
       } else {
         setIsRecording(false);
+        setIsListening(false);
       }
+    };
+
+    // We use this to show the audio wave animation when sound is detected
+    recognitionRef.current.onsoundstart = () => {
+      setIsListening(true);
+    };
+    
+    recognitionRef.current.onsoundend = () => {
+      setIsListening(false);
     };
 
     recognitionRef.current.onerror = (event: any) => {
@@ -146,10 +158,11 @@ export function useSpeechRecognition(options: SpeechRecognitionOptions = {}): Sp
   const resetTranscript = useCallback(() => {
     setTranscript('');
   }, []);
-
+  
   return {
     transcript,
     isRecording,
+    isListening,
     hasError,
     errorMessage,
     startRecording,

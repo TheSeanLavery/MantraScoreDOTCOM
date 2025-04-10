@@ -11,6 +11,7 @@ export default function LiveTranscribe() {
   const {
     transcript,
     isRecording,
+    isListening,
     hasError,
     errorMessage,
     startRecording,

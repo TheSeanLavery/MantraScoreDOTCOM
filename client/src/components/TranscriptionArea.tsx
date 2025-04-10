@@ -26,7 +26,7 @@ export default function TranscriptionArea({ transcript, isRecording, hasError }:
       
       <div 
         ref={transcriptContainerRef}
-        className="p-4 h-64 md:h-80 overflow-y-auto transcript-area"
+        className="p-4 h-64 md:h-80 overflow-y-auto transcript-area relative"
         style={{
           scrollbarWidth: 'thin',
           scrollbarColor: '#94a3b8 #f1f5f9'
@@ -38,6 +38,23 @@ export default function TranscriptionArea({ transcript, isRecording, hasError }:
             <p className="text-slate-400 italic text-center my-8">Your transcription will appear here...</p>
           }
         </div>
+        
+        {/* Audio Wave Indicator - only shows when recording but no error */}
+        {isRecording && !hasError && (
+          <div className="absolute bottom-3 right-3 bg-white/80 backdrop-blur-sm rounded-full px-3 py-2 shadow-sm border border-slate-200">
+            <div className="flex items-center space-x-1">
+              {/* Audio wave animation */}
+              <div className="flex items-end space-x-0.5 h-5">
+                <div className="w-1 bg-blue-400 rounded-full animate-pulse" style={{ height: '40%', animationDelay: '0ms' }}></div>
+                <div className="w-1 bg-blue-500 rounded-full animate-pulse" style={{ height: '70%', animationDelay: '150ms' }}></div>
+                <div className="w-1 bg-blue-600 rounded-full animate-pulse" style={{ height: '100%', animationDelay: '300ms' }}></div>
+                <div className="w-1 bg-blue-500 rounded-full animate-pulse" style={{ height: '80%', animationDelay: '450ms' }}></div>
+                <div className="w-1 bg-blue-400 rounded-full animate-pulse" style={{ height: '40%', animationDelay: '600ms' }}></div>
+              </div>
+              <span className="text-xs font-medium text-blue-600">Listening...</span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
