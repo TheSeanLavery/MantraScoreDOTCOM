@@ -10,6 +10,7 @@ export default function LiveTranscribe() {
   
   const {
     transcript,
+    interimText,
     isRecording,
     isListening,
     hasError,
@@ -53,6 +54,7 @@ export default function LiveTranscribe() {
 
       <TranscriptionArea 
         transcript={transcript} 
+        interimText={interimText}
         isRecording={isRecording}
         isListening={isListening}
         hasError={hasError} 

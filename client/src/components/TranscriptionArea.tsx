@@ -3,12 +3,13 @@ import StatusIndicator from "./StatusIndicator";
 
 interface TranscriptionAreaProps {
   transcript: string;
+  interimText?: string;
   isRecording: boolean;
   isListening?: boolean;
   hasError: boolean;
 }
 
-export default function TranscriptionArea({ transcript, isRecording, isListening = false, hasError }: TranscriptionAreaProps) {
+export default function TranscriptionArea({ transcript, interimText = '', isRecording, isListening = false, hasError }: TranscriptionAreaProps) {
   const transcriptContainerRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when transcript changes

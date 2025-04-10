@@ -7,6 +7,7 @@ interface SpeechRecognitionOptions {
 
 interface SpeechRecognitionHook {
   transcript: string;
+  interimText: string;
   isRecording: boolean;
   isListening: boolean;
   hasError: boolean;
@@ -19,6 +20,7 @@ interface SpeechRecognitionHook {
 
 export function useSpeechRecognition(options: SpeechRecognitionOptions = {}): SpeechRecognitionHook {
   const [transcript, setTranscript] = useState('');
+  const [interimText, setInterimText] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -100,12 +102,21 @@ export function useSpeechRecognition(options: SpeechRecognitionOptions = {}): Sp
 
     recognitionRef.current.onresult = (event: any) => {
       let finalTranscript = '';
+      let currentInterim = '';
       
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
           finalTranscript += event.results[i][0].transcript;
+          // Clear interim when we have final results
+          currentInterim = '';
+        } else {
+          // Update interim text (this will be our sound wave placeholder)
+          currentInterim = event.results[i][0].transcript;
         }
       }
+      
+      // Update the interim text state
+      setInterimText(currentInterim);
       
       // Only update with final transcripts and append to existing transcript
       if (finalTranscript) {
@@ -161,6 +172,7 @@ export function useSpeechRecognition(options: SpeechRecognitionOptions = {}): Sp
   
   return {
     transcript,
+    interimText,
     isRecording,
     isListening,
     hasError,
