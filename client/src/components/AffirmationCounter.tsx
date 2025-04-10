@@ -45,11 +45,8 @@ export default function AffirmationCounter({ transcript }: AffirmationCounterPro
   // Process transcript to count occurrences
   useEffect(() => {
     // Only run if transcript isn't empty
-    if (!transcript.trim() || processedTranscripts.current.has(transcript)) return;
+    if (!transcript.trim()) return;
     
-    // Mark this transcript as processed to avoid double counting
-    processedTranscripts.current.add(transcript);
-
     // Process the transcript for positive affirmations
     setPositiveAffirmations(prevAffirmations => {
       const updatedAffirmations = prevAffirmations.map(item => {
@@ -58,8 +55,15 @@ export default function AffirmationCounter({ transcript }: AffirmationCounterPro
         
         // Create a regex to match the word/phrase with word boundaries
         const regex = new RegExp(`\\b${item.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
-        const matches = transcript.match(regex);
-        const occurrences = matches ? matches.length : 0;
+        
+        // Count ALL occurrences in the current transcript chunk
+        let matches = [];
+        let match;
+        while ((match = regex.exec(transcript)) !== null) {
+          matches.push(match);
+        }
+        
+        const occurrences = matches.length;
         
         // Only update if new occurrences are found
         if (occurrences > 0) {
@@ -94,11 +98,19 @@ export default function AffirmationCounter({ transcript }: AffirmationCounterPro
         if (item.completed) return item;
         
         const regex = new RegExp(`\\b${item.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
-        const matches = transcript.match(regex);
-        const occurrences = matches ? matches.length : 0;
+        
+        // Count ALL occurrences in the current transcript chunk
+        let matches = [];
+        let match;
+        while ((match = regex.exec(transcript)) !== null) {
+          matches.push(match);
+        }
+        
+        const occurrences = matches.length;
         
         if (occurrences > 0) {
-          return { ...item, count: item.count + occurrences };
+          const newCount = item.count + occurrences;
+          return { ...item, count: newCount };
         }
         return item;
       });
