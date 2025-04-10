@@ -36,12 +36,12 @@ export function useSpeechRecognition(options: SpeechRecognitionOptions = {}): Sp
       return;
     }
 
-    const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     recognitionRef.current = new SpeechRecognition();
     
     // Configure speech recognition options
     recognitionRef.current.continuous = true;
-    recognitionRef.current.interimResults = true;
+    recognitionRef.current.interimResults = false; // Changed to false to avoid interim results
     recognitionRef.current.lang = lang;
 
     // Set up event handlers
@@ -89,6 +89,7 @@ export function useSpeechRecognition(options: SpeechRecognitionOptions = {}): Sp
     recognitionRef.current.onresult = (event: any) => {
       let interimTranscript = '';
       let finalTranscript = '';
+      let currentTranscript = transcript;
       
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
@@ -98,11 +99,14 @@ export function useSpeechRecognition(options: SpeechRecognitionOptions = {}): Sp
         }
       }
       
-      // Update transcript with final results plus any interim results
-      setTranscript(prev => {
-        const newTranscript = prev + (finalTranscript ? finalTranscript + ' ' : '');
-        return interimTranscript ? newTranscript + interimTranscript : newTranscript;
-      });
+      // Only update with final transcripts to avoid duplicates
+      if (finalTranscript) {
+        currentTranscript += finalTranscript + ' ';
+        setTranscript(currentTranscript);
+      }
+      
+      // Optionally, we can show interim results in a different way if needed
+      // but for now we're just showing final results to avoid the duplication
     };
 
     // Cleanup
