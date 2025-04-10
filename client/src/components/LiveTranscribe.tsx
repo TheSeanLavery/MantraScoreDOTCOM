@@ -53,7 +53,8 @@ export default function LiveTranscribe() {
 
       <TranscriptionArea 
         transcript={transcript} 
-        isRecording={isRecording} 
+        isRecording={isRecording}
+        isListening={isListening}
         hasError={hasError} 
       />
 

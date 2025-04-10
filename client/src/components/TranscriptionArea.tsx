@@ -4,10 +4,11 @@ import StatusIndicator from "./StatusIndicator";
 interface TranscriptionAreaProps {
   transcript: string;
   isRecording: boolean;
+  isListening?: boolean;
   hasError: boolean;
 }
 
-export default function TranscriptionArea({ transcript, isRecording, hasError }: TranscriptionAreaProps) {
+export default function TranscriptionArea({ transcript, isRecording, isListening = false, hasError }: TranscriptionAreaProps) {
   const transcriptContainerRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when transcript changes
@@ -39,19 +40,35 @@ export default function TranscriptionArea({ transcript, isRecording, hasError }:
           }
         </div>
         
-        {/* Audio Wave Indicator - only shows when recording but no error */}
+        {/* Audio Wave Indicator - only shows when recording and actively listening but no error */}
         {isRecording && !hasError && (
           <div className="absolute bottom-3 right-3 bg-white/80 backdrop-blur-sm rounded-full px-3 py-2 shadow-sm border border-slate-200">
             <div className="flex items-center space-x-1">
-              {/* Audio wave animation */}
-              <div className="flex items-end space-x-0.5 h-5">
-                <div className="w-1 bg-blue-400 rounded-full animate-pulse" style={{ height: '40%', animationDelay: '0ms' }}></div>
-                <div className="w-1 bg-blue-500 rounded-full animate-pulse" style={{ height: '70%', animationDelay: '150ms' }}></div>
-                <div className="w-1 bg-blue-600 rounded-full animate-pulse" style={{ height: '100%', animationDelay: '300ms' }}></div>
-                <div className="w-1 bg-blue-500 rounded-full animate-pulse" style={{ height: '80%', animationDelay: '450ms' }}></div>
-                <div className="w-1 bg-blue-400 rounded-full animate-pulse" style={{ height: '40%', animationDelay: '600ms' }}></div>
-              </div>
-              <span className="text-xs font-medium text-blue-600">Listening...</span>
+              {isListening ? (
+                <>
+                  {/* Active audio wave animation */}
+                  <div className="flex items-end space-x-0.5 h-5">
+                    <div className="w-1 bg-blue-400 rounded-full animate-[bounce_0.9s_ease-in-out_infinite]" style={{ height: '40%', animationDelay: '0ms' }}></div>
+                    <div className="w-1 bg-blue-500 rounded-full animate-[bounce_1.3s_ease-in-out_infinite]" style={{ height: '70%', animationDelay: '150ms' }}></div>
+                    <div className="w-1 bg-blue-600 rounded-full animate-[bounce_0.8s_ease-in-out_infinite]" style={{ height: '100%', animationDelay: '300ms' }}></div>
+                    <div className="w-1 bg-blue-500 rounded-full animate-[bounce_1.2s_ease-in-out_infinite]" style={{ height: '80%', animationDelay: '450ms' }}></div>
+                    <div className="w-1 bg-blue-400 rounded-full animate-[bounce_1s_ease-in-out_infinite]" style={{ height: '40%', animationDelay: '600ms' }}></div>
+                  </div>
+                  <span className="text-xs font-medium text-blue-600">Listening...</span>
+                </>
+              ) : (
+                <>
+                  {/* Idle, waiting for speech */}
+                  <div className="flex items-end space-x-0.5 h-5">
+                    <div className="w-1 bg-slate-300 rounded-full" style={{ height: '40%' }}></div>
+                    <div className="w-1 bg-slate-300 rounded-full" style={{ height: '60%' }}></div>
+                    <div className="w-1 bg-slate-300 rounded-full" style={{ height: '70%' }}></div>
+                    <div className="w-1 bg-slate-300 rounded-full" style={{ height: '60%' }}></div>
+                    <div className="w-1 bg-slate-300 rounded-full" style={{ height: '40%' }}></div>
+                  </div>
+                  <span className="text-xs font-medium text-slate-500">Ready...</span>
+                </>
+              )}
             </div>
           </div>
         )}
