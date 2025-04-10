@@ -1,9 +1,10 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import MicrophonePermissionGuide from "./MicrophonePermissionGuide";
 import TranscriptionArea from "./TranscriptionArea";
 import ControlsArea from "./ControlsArea";
 import AffirmationCounter from "./AffirmationCounter";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
+import { Toaster } from "@/components/ui/toaster";
 
 export default function LiveTranscribe() {
   const [showPermissionGuide, setShowPermissionGuide] = useState(true);
@@ -24,9 +25,9 @@ export default function LiveTranscribe() {
     onPermissionDenied: () => setShowPermissionGuide(true)
   });
 
-  // Process the transcript for affirmation counting when new content is added
-  const handleProcessTranscript = () => {
-    // Get just the new content since last processing
+  // Use useEffect to properly handle transcript changes
+  useEffect(() => {
+    // Process new transcript content when it changes
     if (transcript !== lastProcessedRef.current) {
       const newContent = transcript.slice(lastProcessedRef.current.length);
       if (newContent.trim()) {
@@ -34,7 +35,7 @@ export default function LiveTranscribe() {
         lastProcessedRef.current = transcript;
       }
     }
-  };
+  }, [transcript]);
 
   const toggleRecording = () => {
     if (isRecording) {
@@ -51,11 +52,6 @@ export default function LiveTranscribe() {
     lastProcessedRef.current = "";
     setProcessedTranscript("");
   };
-
-  // Process transcript when it changes
-  if (transcript !== lastProcessedRef.current) {
-    handleProcessTranscript();
-  }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
@@ -97,6 +93,9 @@ export default function LiveTranscribe() {
       <footer className="text-center text-sm text-slate-500 mt-8">
         <p>Privacy Note: All transcription happens locally in your browser. No audio data is sent to any server.</p>
       </footer>
+      
+      {/* Show toast notifications for completed targets */}
+      <Toaster />
     </div>
   );
 }
