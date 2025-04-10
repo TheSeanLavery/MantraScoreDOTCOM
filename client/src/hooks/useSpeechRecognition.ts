@@ -41,7 +41,7 @@ export function useSpeechRecognition(options: SpeechRecognitionOptions = {}): Sp
     
     // Configure speech recognition options
     recognitionRef.current.continuous = true;
-    recognitionRef.current.interimResults = false; // Changed to false to avoid interim results
+    recognitionRef.current.interimResults = true; // Need interim results for better continuity, but we'll only use final ones
     recognitionRef.current.lang = lang;
 
     // Set up event handlers
@@ -87,26 +87,18 @@ export function useSpeechRecognition(options: SpeechRecognitionOptions = {}): Sp
     };
 
     recognitionRef.current.onresult = (event: any) => {
-      let interimTranscript = '';
       let finalTranscript = '';
-      let currentTranscript = transcript;
       
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
           finalTranscript += event.results[i][0].transcript;
-        } else {
-          interimTranscript += event.results[i][0].transcript;
         }
       }
       
-      // Only update with final transcripts to avoid duplicates
+      // Only update with final transcripts and append to existing transcript
       if (finalTranscript) {
-        currentTranscript += finalTranscript + ' ';
-        setTranscript(currentTranscript);
+        setTranscript(prev => prev + finalTranscript + ' ');
       }
-      
-      // Optionally, we can show interim results in a different way if needed
-      // but for now we're just showing final results to avoid the duplication
     };
 
     // Cleanup
