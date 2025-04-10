@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import MicrophonePermissionGuide from "./MicrophonePermissionGuide";
 import TranscriptionArea from "./TranscriptionArea";
 import ControlsArea from "./ControlsArea";
@@ -8,8 +8,6 @@ import { Toaster } from "@/components/ui/toaster";
 
 export default function LiveTranscribe() {
   const [showPermissionGuide, setShowPermissionGuide] = useState(true);
-  const lastProcessedRef = useRef<string>("");
-  const [processedTranscript, setProcessedTranscript] = useState("");
   
   const {
     transcript,
@@ -25,18 +23,6 @@ export default function LiveTranscribe() {
     onPermissionDenied: () => setShowPermissionGuide(true)
   });
 
-  // Use useEffect to properly handle transcript changes
-  useEffect(() => {
-    // Process new transcript content when it changes
-    if (transcript !== lastProcessedRef.current) {
-      const newContent = transcript.slice(lastProcessedRef.current.length);
-      if (newContent.trim()) {
-        setProcessedTranscript(newContent);
-        lastProcessedRef.current = transcript;
-      }
-    }
-  }, [transcript]);
-
   const toggleRecording = () => {
     if (isRecording) {
       stopRecording();
@@ -49,8 +35,6 @@ export default function LiveTranscribe() {
   // Reset transcript and processed content
   const clearTranscript = () => {
     resetTranscript();
-    lastProcessedRef.current = "";
-    setProcessedTranscript("");
   };
 
   return (
@@ -74,7 +58,7 @@ export default function LiveTranscribe() {
         </div>
       )}
 
-      <AffirmationCounter transcript={processedTranscript} />
+      <AffirmationCounter transcript={transcript} />
 
       <TranscriptionArea 
         transcript={transcript} 

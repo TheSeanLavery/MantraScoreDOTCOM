@@ -20,7 +20,7 @@ interface AffirmationCounterProps {
 export default function AffirmationCounter({ transcript }: AffirmationCounterProps) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<'positive' | 'negative'>('positive');
-  const processedTranscripts = useRef<Set<string>>(new Set());
+  const lastProcessedTranscriptRef = useRef<string>("");
   
   const [positiveAffirmations, setPositiveAffirmations] = useState<CountItem[]>([
     { text: "I am confident", count: 0, target: 5, completed: false },
@@ -42,36 +42,44 @@ export default function AffirmationCounter({ transcript }: AffirmationCounterPro
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editingTarget, setEditingTarget] = useState("");
 
-  // Process transcript to count occurrences
+  // SIMPLIFIED APPROACH:
+  // Count all phrases every time, but only on the NEW part of the transcript
   useEffect(() => {
-    // Only run if transcript isn't empty
-    if (!transcript.trim()) return;
+    // Skip empty transcripts
+    if (!transcript || !transcript.trim()) return;
     
-    // Process the transcript for positive affirmations
+    // If we haven't changed at all, skip processing
+    if (transcript === lastProcessedTranscriptRef.current) return;
+    
+    // Get only the new part of the transcript
+    const newTranscriptPart = transcript.slice(lastProcessedTranscriptRef.current.length);
+    
+    // If no new content, just update the ref and return
+    if (!newTranscriptPart.trim()) {
+      lastProcessedTranscriptRef.current = transcript;
+      return;
+    }
+    
+    // Process the new transcript part for positive affirmations
     setPositiveAffirmations(prevAffirmations => {
-      const updatedAffirmations = prevAffirmations.map(item => {
-        // Skip already completed items
-        if (item.completed) return item;
+      return prevAffirmations.map(item => {
+        // Create a simple case-insensitive regex for the phrase
+        // Using lookahead/lookbehind for more accurate phrase matching
+        const escapedText = item.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(?<![\\w])${escapedText}(?![\\w])`, 'gi');
         
-        // Create a regex to match the word/phrase with word boundaries
-        const regex = new RegExp(`\\b${item.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
-        
-        // Count ALL occurrences in the current transcript chunk
-        let matches = [];
-        let match;
-        while ((match = regex.exec(transcript)) !== null) {
-          matches.push(match);
-        }
-        
+        // Find all matches in the new part only
+        let matches = [...newTranscriptPart.matchAll(regex)];
         const occurrences = matches.length;
         
-        // Only update if new occurrences are found
+        // Only update if new occurrences found
         if (occurrences > 0) {
           const newCount = item.count + occurrences;
+          const wasCompleted = item.completed;
           const completed = item.target > 0 && newCount >= item.target;
           
-          // If newly completed, show toast
-          if (completed && !item.completed) {
+          // Show toast only on newly completed items
+          if (completed && !wasCompleted) {
             toast({
               title: "Target Reached! 🎉",
               description: `You've reached your target of saying "${item.text}" ${item.target} times!`,
@@ -85,38 +93,47 @@ export default function AffirmationCounter({ transcript }: AffirmationCounterPro
             completed: completed
           };
         }
+        
+        // No changes needed
         return item;
       });
-      
-      return updatedAffirmations;
     });
     
-    // Process the transcript for negative words
+    // Process for negative words with the same approach
     setNegativeWords(prevWords => {
-      const updatedWords = prevWords.map(item => {
-        // Skip already completed items (for negative words, completed means we've avoided saying it)
-        if (item.completed) return item;
+      return prevWords.map(item => {
+        const escapedText = item.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(?<![\\w])${escapedText}(?![\\w])`, 'gi');
         
-        const regex = new RegExp(`\\b${item.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
-        
-        // Count ALL occurrences in the current transcript chunk
-        let matches = [];
-        let match;
-        while ((match = regex.exec(transcript)) !== null) {
-          matches.push(match);
-        }
-        
+        let matches = [...newTranscriptPart.matchAll(regex)];
         const occurrences = matches.length;
         
         if (occurrences > 0) {
           const newCount = item.count + occurrences;
-          return { ...item, count: newCount };
+          const wasCompleted = item.completed;
+          const completed = item.target > 0 && newCount >= item.target;
+          
+          if (completed && !wasCompleted) {
+            toast({
+              title: "Target Reached",
+              description: `You've used "${item.text}" ${newCount} times, which is above your target.`,
+              duration: 5000,
+            });
+          }
+          
+          return { 
+            ...item, 
+            count: newCount,
+            completed: completed
+          };
         }
+        
         return item;
       });
-      
-      return updatedWords;
     });
+    
+    // Always update our reference to what we've processed
+    lastProcessedTranscriptRef.current = transcript;
     
   }, [transcript, toast]);
 
@@ -168,7 +185,7 @@ export default function AffirmationCounter({ transcript }: AffirmationCounterPro
 
   // Reset all counters
   const resetAllCounters = () => {
-    processedTranscripts.current.clear();
+    lastProcessedTranscriptRef.current = "";
     setPositiveAffirmations(positiveAffirmations.map(item => ({ ...item, count: 0, completed: false })));
     setNegativeWords(negativeWords.map(item => ({ ...item, count: 0, completed: false })));
   };
