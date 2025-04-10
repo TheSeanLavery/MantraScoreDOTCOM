@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import MicrophonePermissionGuide from "./MicrophonePermissionGuide";
 import TranscriptionArea from "./TranscriptionArea";
 import ControlsArea from "./ControlsArea";
-import AdditionalInfo from "./AdditionalInfo";
+import AffirmationCounter from "./AffirmationCounter";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 
 export default function LiveTranscribe() {
   const [showPermissionGuide, setShowPermissionGuide] = useState(true);
+  const lastProcessedRef = useRef<string>("");
+  const [processedTranscript, setProcessedTranscript] = useState("");
   
   const {
     transcript,
@@ -22,6 +24,18 @@ export default function LiveTranscribe() {
     onPermissionDenied: () => setShowPermissionGuide(true)
   });
 
+  // Process the transcript for affirmation counting when new content is added
+  const handleProcessTranscript = () => {
+    // Get just the new content since last processing
+    if (transcript !== lastProcessedRef.current) {
+      const newContent = transcript.slice(lastProcessedRef.current.length);
+      if (newContent.trim()) {
+        setProcessedTranscript(newContent);
+        lastProcessedRef.current = transcript;
+      }
+    }
+  };
+
   const toggleRecording = () => {
     if (isRecording) {
       stopRecording();
@@ -31,11 +45,23 @@ export default function LiveTranscribe() {
     }
   };
 
+  // Reset transcript and processed content
+  const clearTranscript = () => {
+    resetTranscript();
+    lastProcessedRef.current = "";
+    setProcessedTranscript("");
+  };
+
+  // Process transcript when it changes
+  if (transcript !== lastProcessedRef.current) {
+    handleProcessTranscript();
+  }
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
       <header className="mb-6 text-center">
-        <h1 className="text-2xl md:text-3xl font-semibold text-slate-800 mb-2">Live Voice Transcription</h1>
-        <p className="text-slate-500">Convert speech to text in real-time using your microphone</p>
+        <h1 className="text-2xl md:text-3xl font-semibold text-slate-800 mb-2">Affirmation Counter</h1>
+        <p className="text-slate-500">Count your positive affirmations and track words to avoid</p>
       </header>
 
       {showPermissionGuide && <MicrophonePermissionGuide />}
@@ -52,6 +78,8 @@ export default function LiveTranscribe() {
         </div>
       )}
 
+      <AffirmationCounter transcript={processedTranscript} />
+
       <TranscriptionArea 
         transcript={transcript} 
         interimText={interimText}
@@ -63,12 +91,10 @@ export default function LiveTranscribe() {
       <ControlsArea 
         isRecording={isRecording} 
         toggleRecording={toggleRecording} 
-        clearTranscript={resetTranscript} 
+        clearTranscript={clearTranscript} 
       />
 
-      <AdditionalInfo />
-
-      <footer className="text-center text-sm text-slate-500">
+      <footer className="text-center text-sm text-slate-500 mt-8">
         <p>Privacy Note: All transcription happens locally in your browser. No audio data is sent to any server.</p>
       </footer>
     </div>
