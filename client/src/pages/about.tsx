@@ -6,9 +6,17 @@ export default function AboutPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
       <header className="mb-8 text-center">
-        <h1 className="text-3xl md:text-4xl font-bold text-slate-800 mb-3">
-          <span className="text-blue-600">Mantra</span><span className="text-green-600">Score</span>.com
-        </h1>
+        <div className="flex justify-center items-center mb-3">
+          <img 
+            src="/cropped_glow_icon.png" 
+            alt="MantraScore Logo" 
+            className="h-12 w-auto mr-3" 
+          />
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-800">
+            <span className="text-blue-600">Mantra</span>
+            <span className="text-green-600">Score</span>.com
+          </h1>
+        </div>
         <p className="text-slate-600 mb-4">Track your daily affirmations and mindful speech patterns</p>
         <Link href="/" className="inline-flex items-center text-blue-600 hover:text-blue-800">
           <Home className="h-4 w-4 mr-2" />

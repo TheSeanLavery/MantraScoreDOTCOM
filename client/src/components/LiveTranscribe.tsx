@@ -11,8 +11,9 @@ import { Link } from "@/components/ui/link";
 import { Info } from "lucide-react";
 
 export default function LiveTranscribe() {
-  const [showPermissionGuide, setShowPermissionGuide] = useState(true);
-  const [selectedDate, setSelectedDate] = useState(getTodayDateString());
+  // Only show permission guide if microphone access is not granted
+  const [showPermissionGuide, setShowPermissionGuide] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   const {
     transcript,
@@ -28,12 +29,19 @@ export default function LiveTranscribe() {
     onPermissionDenied: () => setShowPermissionGuide(true),
   });
 
+  // If user successfully starts recording, they must have granted mic access
+  useEffect(() => {
+    if (isRecording) {
+      setShowPermissionGuide(false);
+    }
+  }, [isRecording]);
+
   const toggleRecording = () => {
     if (isRecording) {
       stopRecording();
     } else {
-      setShowPermissionGuide(false);
       startRecording();
+      // If starting recording fails due to permissions, the onPermissionDenied callback will show the guide
     }
   };
 
@@ -44,19 +52,30 @@ export default function LiveTranscribe() {
 
   // Handle date change
   const handleDateChange = (date: string) => {
+    console.log("LiveTranscribe received date change:", date);
     setSelectedDate(date);
   };
 
+  // Use today's date as a fallback if no date is selected yet
+  const effectiveDate = selectedDate || getTodayDateString();
+  
   // Determine if we're in read-only mode (viewing a past date)
-  const isReadOnly = selectedDate !== getTodayDateString();
+  const isReadOnly = effectiveDate !== getTodayDateString();
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
       <header className="mb-6 text-center">
-        <h1 className="text-2xl md:text-3xl font-semibold text-slate-800 mb-2">
-          <span className="text-blue-600">Mantra</span>
-          <span className="text-green-600">Score</span>.com
-        </h1>
+        <div className="flex justify-center items-center mb-2">
+          <img 
+            src="/cropped_glow_icon.png" 
+            alt="MantraScore Logo" 
+            className="h-12 w-auto mr-3" 
+          />
+          <h1 className="text-2xl md:text-3xl font-semibold text-slate-800">
+            <span className="text-blue-600">Mantra</span>
+            <span className="text-green-600">Score</span>.com
+          </h1>
+        </div>
         <p className="text-slate-500 mb-2">
           Track your daily affirmations and mindful speech patterns
         </p>
@@ -76,9 +95,10 @@ export default function LiveTranscribe() {
         <DateSelector onDateChange={handleDateChange} />
       </div>
 
-      {showPermissionGuide && <MicrophonePermissionGuide />}
+      {/* Only show the permission guide if microphone access is not granted */}
+      {showPermissionGuide && !isRecording && <MicrophonePermissionGuide />}
 
-      {hasError && (
+      {hasError && !showPermissionGuide && (
         <div className="bg-red-50 text-red-600 p-4 rounded-md mb-4">
           <div className="flex items-start">
             <svg
@@ -102,7 +122,7 @@ export default function LiveTranscribe() {
 
       <AffirmationCounter
         transcript={transcript}
-        selectedDate={selectedDate}
+        selectedDate={effectiveDate}
         readOnly={isReadOnly}
       />
 

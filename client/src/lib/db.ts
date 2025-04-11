@@ -83,10 +83,15 @@ export class AffirmationDB {
       const transaction = this.db!.transaction([STORE_NAME], "readonly");
       const store = transaction.objectStore(STORE_NAME);
       
-      const request = store.getAll();
+      // Use index to get records in date order
+      const index = store.index("date");
+      const request = index.getAll();
       
       request.onsuccess = () => {
-        resolve(request.result || []);
+        // Sort by date descending (newest first) before returning
+        const records = request.result || [];
+        records.sort((a, b) => b.date.localeCompare(a.date));
+        resolve(records);
       };
       
       request.onerror = (event) => {
@@ -164,10 +169,13 @@ export class AffirmationDB {
 // Create and export a singleton instance
 export const affirmationDB = new AffirmationDB();
 
-// Helper function to get today's date in YYYY-MM-DD format
+// Helper function to get today's date in YYYY-MM-DD format using local time
 export const getTodayDateString = (): string => {
   const today = new Date();
-  return today.toISOString().split('T')[0];
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 };
 
 // Helper function to format a date for display (e.g., "Monday, Jan 1, 2023")

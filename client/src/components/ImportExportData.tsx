@@ -63,8 +63,13 @@ export function ImportExportData() {
     const blob = new Blob([exportData], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
+    
+    // Format today's date for the filename using local date
+    const today = new Date();
+    const dateString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    
     a.href = url;
-    a.download = `affirmation-data-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `affirmation-data-${dateString}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

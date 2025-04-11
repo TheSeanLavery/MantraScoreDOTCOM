@@ -9,6 +9,7 @@ interface DateSelectorProps {
 }
 
 export function DateSelector({ onDateChange }: DateSelectorProps) {
+  // Initially set to today, but will update to most recent date after data loads
   const [selectedDate, setSelectedDate] = useState(getTodayDateString());
   const [showCalendar, setShowCalendar] = useState(false);
   const [availableDates, setAvailableDates] = useState<string[]>([]);
@@ -17,41 +18,66 @@ export function DateSelector({ onDateChange }: DateSelectorProps) {
   useEffect(() => {
     const loadDates = async () => {
       try {
+        console.log("Loading dates from database...");
         const records = await affirmationDB.getAllRecords();
-        const dates = records.map(record => record.date).sort();
+        console.log("Raw records:", records);
+        
+        // Sort dates in descending order (newest first)
+        const dates = records
+          .map(record => record.date)
+          .sort((a, b) => b.localeCompare(a)); // Reverse sort to get newest first
+          
+        console.log("Sorted dates (newest first):", dates);
         setAvailableDates(dates);
+        
+        // If we have dates and today isn't in our dataset, select the most recent one
+        if (dates.length > 0) {
+          const todayString = getTodayDateString();
+          console.log("Today's date:", todayString);
+          const todayExists = dates.includes(todayString);
+          console.log("Today exists in dates:", todayExists);
+          
+          // If today's date exists in our records, use it
+          // Otherwise use the most recent date (which is the first one after sorting)
+          const mostRecentDate = todayExists ? todayString : dates[0];
+          console.log("Setting selected date to:", mostRecentDate);
+          setSelectedDate(mostRecentDate);
+          
+          // Immediately notify parent of the change
+          onDateChange(mostRecentDate);
+        }
       } catch (error) {
         console.error("Error loading dates:", error);
       }
     };
     
     loadDates();
-  }, []);
-  
-  // Update the parent component when the date changes
-  useEffect(() => {
-    onDateChange(selectedDate);
-  }, [selectedDate, onDateChange]);
+  }, [onDateChange]);
   
   // Navigate to the previous day with data
   const goToPreviousDay = () => {
-    const currentIndex = availableDates.indexOf(selectedDate);
-    if (currentIndex > 0) {
-      setSelectedDate(availableDates[currentIndex - 1]);
-    }
-  };
-  
-  // Navigate to the next day with data
-  const goToNextDay = () => {
     const currentIndex = availableDates.indexOf(selectedDate);
     if (currentIndex < availableDates.length - 1) {
       setSelectedDate(availableDates[currentIndex + 1]);
     }
   };
   
+  // Navigate to the next day with data
+  const goToNextDay = () => {
+    const currentIndex = availableDates.indexOf(selectedDate);
+    if (currentIndex > 0) {
+      setSelectedDate(availableDates[currentIndex - 1]);
+    }
+  };
+  
   // Go to today
   const goToToday = () => {
     setSelectedDate(getTodayDateString());
+  };
+  
+  // Format a date in YYYY-MM-DD format from year, month, day
+  const formatDateString = (year: number, month: number, day: number): string => {
+    return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
   };
   
   // Generate a simple month calendar
@@ -84,7 +110,7 @@ export function DateSelector({ onDateChange }: DateSelectorProps) {
             size="sm"
             onClick={() => {
               const newDate = new Date(year, month - 1, 1);
-              setSelectedDate(newDate.toISOString().split('T')[0]);
+              setSelectedDate(formatDateString(newDate.getFullYear(), newDate.getMonth(), 1));
             }}
           >
             <ChevronLeft className="h-4 w-4" />
@@ -97,7 +123,7 @@ export function DateSelector({ onDateChange }: DateSelectorProps) {
             size="sm"
             onClick={() => {
               const newDate = new Date(year, month + 1, 1);
-              setSelectedDate(newDate.toISOString().split('T')[0]);
+              setSelectedDate(formatDateString(newDate.getFullYear(), newDate.getMonth(), 1));
             }}
           >
             <ChevronRight className="h-4 w-4" />
@@ -119,7 +145,7 @@ export function DateSelector({ onDateChange }: DateSelectorProps) {
           
           {/* Days of the month */}
           {days.map(day => {
-            const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const dateString = formatDateString(year, month, day);
             const isSelected = dateString === selectedDate;
             const hasData = availableDatesSet.has(dateString);
             const isToday = dateString === getTodayDateString();
@@ -171,7 +197,7 @@ export function DateSelector({ onDateChange }: DateSelectorProps) {
         variant="outline" 
         size="sm" 
         onClick={goToPreviousDay}
-        disabled={availableDates.indexOf(selectedDate) <= 0}
+        disabled={availableDates.indexOf(selectedDate) >= availableDates.length - 1}
       >
         <ChevronLeft className="h-4 w-4 mr-1" /> Previous Day
       </Button>
@@ -192,7 +218,7 @@ export function DateSelector({ onDateChange }: DateSelectorProps) {
         variant="outline" 
         size="sm" 
         onClick={goToNextDay}
-        disabled={availableDates.indexOf(selectedDate) >= availableDates.length - 1}
+        disabled={availableDates.indexOf(selectedDate) <= 0}
       >
         Next Day <ChevronRight className="h-4 w-4 ml-1" />
       </Button>
