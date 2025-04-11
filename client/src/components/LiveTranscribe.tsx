@@ -3,17 +3,19 @@ import MicrophonePermissionGuide from "./MicrophonePermissionGuide";
 import TranscriptionArea from "./TranscriptionArea";
 import ControlsArea from "./ControlsArea";
 import AffirmationCounter from "./AffirmationCounter";
-import { DateSelector } from "./DateSelector";
 import { ImportExportData } from "./ImportExportData";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { getTodayDateString } from "@/lib/db";
 import { Link } from "@/components/ui/link";
-import { Info } from "lucide-react";
+import { Info, Trash2 } from "lucide-react";
+import { NewDateSelector, clearAllAffirmationData } from "./NewDateSelector";
+import { Button } from "@/components/ui/button";
 
 export default function LiveTranscribe() {
   // Only show permission guide if microphone access is not granted
   const [showPermissionGuide, setShowPermissionGuide] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string>(getTodayDateString());
+  const [isClearing, setIsClearing] = useState<boolean>(false);
 
   const {
     transcript,
@@ -52,15 +54,39 @@ export default function LiveTranscribe() {
 
   // Handle date change
   const handleDateChange = (date: string) => {
-    console.log("LiveTranscribe received date change:", date);
     setSelectedDate(date);
   };
-
-  // Use today's date as a fallback if no date is selected yet
-  const effectiveDate = selectedDate || getTodayDateString();
+  
+  // Clear all data
+  const clearAllData = async () => {
+    // Ask for confirmation before clearing
+    const confirmed = window.confirm(
+      "Are you sure you want to clear ALL your affirmation data? This cannot be undone."
+    );
+    
+    if (confirmed) {
+      try {
+        setIsClearing(true);
+        
+        // Use the exported function to clear all data
+        await clearAllAffirmationData();
+        
+        // Go back to today
+        setSelectedDate(getTodayDateString());
+        
+        // Show success alert
+        alert("All data has been cleared successfully.");
+      } catch (error) {
+        console.error("Error clearing data:", error);
+        alert("Failed to clear data. Please try again.");
+      } finally {
+        setIsClearing(false);
+      }
+    }
+  };
   
   // Determine if we're in read-only mode (viewing a past date)
-  const isReadOnly = effectiveDate !== getTodayDateString();
+  const isReadOnly = selectedDate !== getTodayDateString();
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
@@ -72,8 +98,8 @@ export default function LiveTranscribe() {
             className="h-12 w-auto mr-3" 
           />
           <h1 className="text-2xl md:text-3xl font-semibold text-slate-800">
-            <span className="text-blue-600">Mantra</span>
-            <span className="text-green-600">Score</span>.com
+            <span className="text-teal-500">Mantra</span>
+            <span className="text-amber-400">Score</span>.com
           </h1>
         </div>
         <p className="text-slate-500 mb-2">
@@ -82,7 +108,7 @@ export default function LiveTranscribe() {
         <div className="flex justify-center">
           <Link
             href="/about"
-            className="text-sm text-slate-400 flex items-center hover:text-blue-600"
+            className="text-sm text-slate-400 flex items-center hover:text-teal-500"
           >
             <Info className="h-3 w-3 mr-1" />
             About
@@ -90,9 +116,9 @@ export default function LiveTranscribe() {
         </div>
       </header>
 
-      {/* Date selector only */}
+      {/* Date selector */}
       <div className="mb-6">
-        <DateSelector onDateChange={handleDateChange} />
+        <NewDateSelector onDateChange={handleDateChange} />
       </div>
 
       {/* Only show the permission guide if microphone access is not granted */}
@@ -122,7 +148,7 @@ export default function LiveTranscribe() {
 
       <AffirmationCounter
         transcript={transcript}
-        selectedDate={effectiveDate}
+        selectedDate={selectedDate}
         readOnly={isReadOnly}
       />
 
@@ -155,13 +181,13 @@ export default function LiveTranscribe() {
         <div className="flex justify-center gap-4 mt-3">
           <Link
             href="https://github.com/TheSeanLavery/MantraScoreDOTCOM"
-            className="text-xs text-slate-400 hover:text-blue-600"
+            className="text-xs text-slate-400 hover:text-teal-500"
           >
             GitHub
           </Link>
           <Link
             href="/license.txt"
-            className="text-xs text-slate-400 hover:text-blue-600"
+            className="text-xs text-slate-400 hover:text-teal-500"
           >
             MIT License
           </Link>
@@ -171,6 +197,20 @@ export default function LiveTranscribe() {
       {/* Import/Export controls at the bottom */}
       <div className="mt-8 flex justify-center">
         <ImportExportData />
+      </div>
+      
+      {/* Clear data button */}
+      <div className="mt-6 flex justify-center">
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={clearAllData}
+          disabled={isClearing}
+          className="flex items-center gap-1"
+        >
+          <Trash2 className="h-4 w-4" />
+          <span>{isClearing ? "Clearing..." : "Clear All Data"}</span>
+        </Button>
       </div>
     </div>
   );

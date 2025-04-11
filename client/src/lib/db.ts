@@ -171,11 +171,25 @@ export const affirmationDB = new AffirmationDB();
 
 // Helper function to get today's date in YYYY-MM-DD format using local time
 export const getTodayDateString = (): string => {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, '0');
-  const day = String(today.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  // Create new date object for current time
+  const now = new Date();
+  console.log('Raw Date object in getTodayDateString:', now);
+  console.log('Raw Date toString():', now.toString());
+  console.log('Date timezone offset in minutes:', now.getTimezoneOffset());
+  
+  // Get current timezone offset in milliseconds
+  const timezoneOffset = now.getTimezoneOffset() * 60000;
+  
+  // Create a date that's adjusted for the timezone
+  const today = new Date(now.getTime() - timezoneOffset);
+  console.log('Timezone adjusted date:', today);
+  
+  // Use toISOString() which gives YYYY-MM-DDTHH:mm:ss.sssZ format
+  // and then take just the date part (YYYY-MM-DD)
+  const dateString = today.toISOString().split('T')[0];
+  console.log('ISO date string (YYYY-MM-DD):', dateString);
+  
+  return dateString;
 };
 
 // Helper function to format a date for display (e.g., "Monday, Jan 1, 2023")

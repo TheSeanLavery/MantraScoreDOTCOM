@@ -13,12 +13,12 @@ export default function AboutPage() {
             className="h-12 w-auto mr-3" 
           />
           <h1 className="text-3xl md:text-4xl font-bold text-slate-800">
-            <span className="text-blue-600">Mantra</span>
-            <span className="text-green-600">Score</span>.com
+            <span className="text-teal-500">Mantra</span>
+            <span className="text-amber-400">Score</span>.com
           </h1>
         </div>
         <p className="text-slate-600 mb-4">Track your daily affirmations and mindful speech patterns</p>
-        <Link href="/" className="inline-flex items-center text-blue-600 hover:text-blue-800">
+        <Link href="/" className="inline-flex items-center text-teal-500 hover:text-teal-600">
           <Home className="h-4 w-4 mr-2" />
           Return to App
         </Link>
@@ -60,7 +60,7 @@ export default function AboutPage() {
                     href="https://linkedin.com/in/sean-lavery" 
                     target="_blank"
                     rel="noopener noreferrer" 
-                    className="flex items-center text-blue-600 hover:underline"
+                    className="flex items-center text-teal-500 hover:underline"
                   >
                     <Linkedin className="h-4 w-4 mr-2" />
                     linkedin.com/in/sean-lavery
@@ -69,7 +69,7 @@ export default function AboutPage() {
                     href="https://github.com/TheSeanLavery" 
                     target="_blank"
                     rel="noopener noreferrer" 
-                    className="flex items-center text-blue-600 hover:underline"
+                    className="flex items-center text-teal-500 hover:underline"
                   >
                     <Github className="h-4 w-4 mr-2" />
                     github.com/TheSeanLavery
@@ -82,7 +82,7 @@ export default function AboutPage() {
                     href="https://buymeacoffee.com/seanlavery" 
                     target="_blank"
                     rel="noopener noreferrer" 
-                    className="flex items-center text-blue-600 hover:underline"
+                    className="flex items-center text-teal-500 hover:underline"
                   >
                     <Coffee className="h-4 w-4 mr-2" />
                     buymeacoffee.com/seanlavery
@@ -91,7 +91,7 @@ export default function AboutPage() {
                     href="https://replit.com/refer/theseanlavery" 
                     target="_blank"
                     rel="noopener noreferrer" 
-                    className="flex items-center text-blue-600 hover:underline"
+                    className="flex items-center text-teal-500 hover:underline"
                   >
                     <span className="w-4 h-4 mr-2 inline-flex items-center justify-center">R</span>
                     replit.com/refer/theseanlavery
@@ -100,7 +100,7 @@ export default function AboutPage() {
                     href="https://windsurf.com/refer?referral_code=b6db9e7ac1" 
                     target="_blank"
                     rel="noopener noreferrer" 
-                    className="flex items-center text-blue-600 hover:underline"
+                    className="flex items-center text-teal-500 hover:underline"
                   >
                     <span className="w-4 h-4 mr-2 inline-flex items-center justify-center">W</span>
                     windsurf.com/refer?referral_code=b6db9e7ac1
@@ -115,7 +115,7 @@ export default function AboutPage() {
                     href="https://x.com/CyborgLavery" 
                     target="_blank"
                     rel="noopener noreferrer" 
-                    className="flex items-center text-blue-600 hover:underline"
+                    className="flex items-center text-teal-500 hover:underline"
                   >
                     <Twitter className="h-4 w-4 mr-2" />
                     x.com/CyborgLavery
@@ -128,7 +128,7 @@ export default function AboutPage() {
                     href="https://calendly.com/seanlavery/powerlevel" 
                     target="_blank"
                     rel="noopener noreferrer" 
-                    className="flex items-center text-blue-600 hover:underline"
+                    className="flex items-center text-teal-500 hover:underline"
                   >
                     <Calendar className="h-4 w-4 mr-2" />
                     1-Hour Powerleveling
@@ -137,7 +137,7 @@ export default function AboutPage() {
                     href="https://calendly.com/seanlavery/30min" 
                     target="_blank"
                     rel="noopener noreferrer" 
-                    className="flex items-center text-blue-600 hover:underline"
+                    className="flex items-center text-teal-500 hover:underline"
                   >
                     <Calendar className="h-4 w-4 mr-2" />
                     30-Minute Session
@@ -150,7 +150,7 @@ export default function AboutPage() {
                     href="https://powerlevelai.com" 
                     target="_blank"
                     rel="noopener noreferrer" 
-                    className="flex items-center text-blue-600 hover:underline"
+                    className="flex items-center text-teal-500 hover:underline"
                   >
                     <span className="w-4 h-4 mr-2 inline-flex items-center justify-center">⚡</span>
                     PowerLevelAI: powerlevelai.com
@@ -174,7 +174,7 @@ export default function AboutPage() {
                 href="https://github.com/TheSeanLavery/MantraScoreDOTCOM" 
                 target="_blank"
                 rel="noopener noreferrer" 
-                className="flex items-center justify-center bg-slate-900 hover:bg-slate-700 text-white py-2 px-4 rounded"
+                className="flex items-center justify-center bg-teal-500 hover:bg-teal-600 text-white py-2 px-4 rounded"
               >
                 <Github className="h-4 w-4 mr-2" />
                 View on GitHub
@@ -183,7 +183,7 @@ export default function AboutPage() {
                 href="/license.txt" 
                 target="_blank"
                 rel="noopener noreferrer" 
-                className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
+                className="flex items-center justify-center bg-amber-400 hover:bg-amber-500 text-white py-2 px-4 rounded"
               >
                 <span className="w-4 h-4 mr-2 inline-flex items-center justify-center">©</span>
                 MIT License
