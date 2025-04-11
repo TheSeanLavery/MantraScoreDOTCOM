@@ -163,7 +163,7 @@ export default function AboutPage() {
             </p>
             <div className="flex flex-col md:flex-row gap-4 mt-4">
               <a 
-                href="https://github.com/TheSeanLavery/mantrascore.com" 
+                href="https://github.com/TheSeanLavery/MantraScoreDOTCOM" 
                 target="_blank"
                 rel="noopener noreferrer" 
                 className="flex items-center justify-center bg-slate-900 hover:bg-slate-700 text-white py-2 px-4 rounded"
